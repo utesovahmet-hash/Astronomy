@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Виртуалды астрономиялық зертхана</title>
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;font:15px/1.5 system-ui,Arial,sans-serif;color:#e6f0ff;background:radial-gradient(ellipse at 15% 0,#14357a,transparent 55%),#050b1f fixed}
+.top{position:sticky;top:0;z-index:9;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(5,11,31,.92);backdrop-filter:blur(8px);border-bottom:1px solid #1f3d7a}
+h1{margin:0;font-size:clamp(17px,3.2vw,26px);color:#fff;text-shadow:0 0 18px #38d5ff88}
+.top p{margin:2px 0 0;font-size:13px;color:#9fb8e6}
+nav a{display:inline-block;margin:2px 4px 2px 0;padding:6px 14px;border:1px solid #1f4a8f;border-radius:20px;color:#38d5ff;text-decoration:none;font-size:14px}
+nav a:hover{background:#14357a}
+main{max-width:1400px;margin:auto;padding:10px}
+section{margin:16px 0}
+h2{margin:0 0 8px;font-size:20px;color:#fff}
+h3{margin:0 0 6px;font-size:15px;color:#38d5ff}
+.pn{background:linear-gradient(160deg,#0f2a5e,#0a1a3f);border:1px solid #23508f;border-radius:14px;padding:12px}
+.pn p{margin:4px 0}
+.gr{display:grid;gap:10px}
+.c2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.sim{grid-template-columns:minmax(0,3fr) minmax(290px,1fr);align-items:start}
+.bt{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);margin-top:10px}
+@media(max-width:860px){.sim,.bt{grid-template-columns:1fr}}
+#vw{position:relative;height:clamp(440px,76vh,820px);border-radius:10px;overflow:hidden;background:#040a1c;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#vw.fs{position:fixed;inset:0;height:auto;z-index:1000;border-radius:0}
+#vw:fullscreen{border-radius:0}
+#vw:-webkit-full-screen{border-radius:0}
+#cv{position:absolute;inset:0}
+#cv canvas{display:block;width:100%;height:100%;touch-action:none;outline:0;cursor:grab}
+#cv canvas:active{cursor:grabbing}
+.lb{position:absolute;font-size:13px;font-weight:600;pointer-events:none;white-space:nowrap;text-shadow:0 0 3px #000,0 0 3px #000,0 0 6px #000}
+.lb.r{transform:translate(12px,-50%)}
+.lb.l{transform:translate(calc(-100% - 12px),-50%)}
+.lb.a{transform:translate(-50%,calc(-100% - 12px))}
+.lb.b{transform:translate(-50%,12px)}
+#vw.big .lb{font-size:18px}
+#tb3{position:absolute;z-index:5;left:50%;bottom:10px;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:6px;width:max-content;max-width:calc(100% - 16px)}
+#tb3 button{min-width:50px;min-height:50px;margin:0;padding:6px 12px;font-size:22px;line-height:1;border-radius:12px;background:rgba(10,26,63,.85);border:1px solid #38d5ff;touch-action:manipulation}
+#tb3 button.t{font-size:15px;font-weight:600}
+#tb3 button:active{background:#2f6fd6}
+#vw.big #tb3 button{min-width:64px;min-height:64px;font-size:28px}
+#vw.big #tb3 button.t{font-size:19px}
+#tb3 button.on{background:#ff9f43;border-color:#ff9f43;color:#111}
+#rl{position:absolute;z-index:4;left:10px;top:10px;width:min(300px,44%);background:rgba(5,11,31,.86);border:1px solid #38d5ff;border-radius:12px;overflow:hidden}
+#rl.off{display:none}
+#rl div{padding:4px 10px;font-size:12px;font-weight:600;color:#38d5ff}
+#rl canvas{display:block;width:100%;aspect-ratio:3/2}
+#vw.big #rl{width:min(460px,40%)}
+#vw.big #rl div{font-size:15px}
+.er{padding:14px;color:#ffb4a8}
+.s{font-size:13px;color:#9fb8e6;margin:6px 0 0}
+label{display:block;margin-top:12px;color:#c9dcff}
+label b{color:#fff;float:right}
+input[type=range]{width:100%;height:32px;accent-color:#38d5ff}
+button,select{background:#1b4b9b;color:#fff;border:1px solid #2f6fd6;border-radius:8px;padding:8px 12px;margin:3px 3px 3px 0;font:inherit;cursor:pointer;max-width:100%}
+button:hover{background:#2f6fd6}
+button:disabled{opacity:.4;cursor:default}
+button.on{background:#ff9f43;border-color:#ff9f43;color:#111}
+.rs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.k{background:#07163a;border:1px solid #23508f;border-radius:10px;padding:8px 10px}
+.k small{display:block;color:#9fb8e6;font-size:12px}
+.k b{font-size:clamp(18px,2.4vw,26px);color:#fff;font-variant-numeric:tabular-nums}
+.k.o b{color:#ff9f43}
+.k.c b{color:#38d5ff}
+#gr{display:block;width:100%;height:270px}
+.f{font:18px/1.9 Cambria,'Times New Roman',serif;background:#07163a;border-radius:10px;padding:6px 12px;margin:4px 0;overflow-x:auto}
+.w{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:6px 8px;border-bottom:1px solid #23508f;text-align:center}
+th{background:#14357a}
+tr:nth-child(even) td{background:#0a1d47}
+.q{margin:8px 0;padding:10px;background:#07163a;border-radius:10px}
+.q button{display:block;width:100%;text-align:left}
+.q p{margin:6px 0 0;color:#ffe9a8}
+.ok{background:#1f9d55!important;border-color:#1f9d55!important}
+.no{background:#c0392b!important;border-color:#c0392b!important}
+</style>
+</head>
+<body>
+<header class="top">
+<div><h1>ВИРТУАЛДЫ АСТРОНОМИЯЛЫҚ ЗЕРТХАНА</h1><p>Астрономиялық бақылауларда атмосфералық рефракцияны зерттеу</p></div>
+<nav><a href="#theory">Теория</a><a href="#sim">Симулятор</a><a href="#exp">Тәжірибе</a><a href="#test">Тексеру</a></nav>
+</header>
+<main>
+
+<section id="theory"><h2>Теория</h2>
+<div class="gr c2">
+<div class="pn"><h3>Атмосфералық рефракция</h3>Жарық сәулесінің Жер атмосферасының тығыздығы әртүрлі қабаттарынан өткенде иілуі. Сәуле тығыз қабатқа жақындағанда жергілікті нормальға қарай иіледі, сондықтан жұлдыз нақты орнынан жоғары көрінеді.</div>
+<div class="pn"><h3>Негізгі қатынастар</h3><div class="f">R = h<sub>көр</sub> − h<sub>геом</sub><br>h<sub>көр</sub> = h<sub>геом</sub> + R/60<br>h<sub>геом</sub> = h<sub>көр</sub> − R/60</div><p class="s">h – градуспен, R – бұрыштық минутпен (′).</p></div>
+<div class="pn"><h3>Сэмундссон формуласы</h3><div class="f">R = 1,02 / tg( h + 10,3 / (h + 5,11) )<br>R′ = R · (P / 1010) · (283 / (273 + T))</div><p class="s">P – гПа, T – °C. Жуық эмпирикалық формула: көкжиекке өте жақын жерде нәтиже атмосфералық жағдайға сезімтал.</p></div>
+<div class="pn"><h3>Сыну көрсеткішінің профилі</h3><div class="f">n(z) = 1 + (n<sub>0</sub> − 1)·e<sup>−z/H</sup><br>n(r)·r·sin ξ = const</div><p class="s">Көкжиекке жақындаған сайын сәуле атмосферада ұзағырақ жүріп, тығыз төменгі қабаттарда көбірек иіледі, сондықтан R артады.</p></div>
+</div></section>
+
+<section id="sim"><h2>Симулятор</h2>
+<div class="gr sim">
+<div class="pn" style="padding:8px"><div id="vw"><div id="cv"></div>
+<div id="rl"><div>Шын өмірде: бақылаушы көзімен (нақты масштаб)</div><canvas id="rlc"></canvas></div>
+<div id="tb3"><button id="c3h" title="Бастапқы күй">⟲</button><button id="c3p" title="Үлкейту">+</button><button id="c3m" title="Кішірейту">−</button><button id="c3l" title="Солға бұру">◀&#xFE0E;</button><button id="c3u" title="Жоғары бұру">▲</button><button id="c3d" title="Төмен бұру">▼</button><button id="c3r" title="Оңға бұру">▶&#xFE0E;</button><button id="c3s" class="t">Бүйірінен</button><button id="c3f" class="t">Алдынан</button><button id="c3t" class="t">Жоғарыдан</button><button id="c3w" class="t on">Шын өмірде</button><button id="c3x" class="t">Толық экран</button></div></div>
+<p class="s"><span style="color:#4ade80">┅ Геометриялық бағыт</span> &nbsp; <span style="color:#38d5ff">━ Сәуле траекториясы</span> &nbsp; <span style="color:#ff9f43">━ Көрінерлік бағыт</span> &nbsp; <span style="color:#fde047">◠ R бұрышы</span><br>Тышқан: сол батырма – айналдыру, дөңгелек – үлкейту, оң батырма – жылжыту. Сенсорлы экран: бір саусақ – айналдыру, екі саусақ – үлкейту және жылжыту.<br><b>Ескерту:</b> атмосфера қалыңдығы мен R бұрышы көрнекілік үшін үлкейтілген: көрнекі бұрыш = масштаб × R (×1 – нақты). Масштаб тек 3D көріністі өзгертеді, сандық нәтижелер өзгермейді. Сәуле жолы n(z) профиліне сәйкес иілетін көрнекі модель.</p></div>
+<div class="pn">
+<h3>Басқару панелі</h3>
+<label>Геометриялық биіктік h <b id="vh"></b></label><input id="h" type="range" min="0" max="85" step="1" value="30"><div id="pr"></div>
+<label>Атмосфералық қысым P <b id="vp"></b></label><input id="p" type="range" min="800" max="1050" step="5" value="1010">
+<label>Ауа температурасы T <b id="vt"></b></label><input id="t" type="range" min="-20" max="40" step="1" value="10">
+<label>Бұрыш масштабы (көрнекілік) <select id="mag"><option value="1">×1 (нақты)</option><option value="10">×10</option><option value="30">×30</option><option value="60" selected>×60</option></select></label>
+<p class="s">Масштаб тек 3D суреттегі R бұрышын (және атмосфера қалыңдығын) көрнекі үлкейтеді, сандар әрқашан нақты. Шын өмірдегі көрініс – 3D терезесінің сол жақ жоғарғы бұрышында.</p>
+</div></div>
+<div class="gr bt">
+<div class="pn"><h3>Есептеу нәтижелері</h3><div class="rs" id="rs"></div></div>
+<div class="pn"><h3>R(h) графигі: рефракцияның биіктікке тәуелділігі</h3><canvas id="gr"></canvas><p class="s">X – геометриялық биіктік h (°), Y – рефракция R (′). Нүкте – таңдалған биіктік.</p></div>
+</div></section>
+
+<section id="exp"><h2>Тәжірибе</h2><div class="pn">
+<div id="et"></div><p id="ed"></p><div id="qb"></div>
+<p class="s" id="lv"></p>
+<button id="sv">Өлшеуді сақтау</button><button id="cl">Кестені тазалау</button><button id="csv">CSV жүктеу</button>
+<div class="w"><table><thead><tr><th>Тәжірибе №</th><th>Биіктік h</th><th>Қысым, гПа</th><th>Температура, °C</th><th>Рефракция R</th><th>Көрінерлік биіктік</th></tr></thead><tbody id="tb"></tbody></table></div>
+</div></section>
+
+<section id="test"><h2>Тексеру</h2><div class="pn"><div id="qz"></div><p id="pt" class="s">Нәтиже: 0 / 5</p></div></section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://unpkg.com/three@0.128.0/build/three.min.js"><\/script>')</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>window.THREE&&!THREE.OrbitControls&&document.write('<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>')</script>
+<script>
+const $=i=>document.getElementById(i),rd=Math.PI/180,pad=n=>String(n).padStart(2,'0'),Re=5,Z=1.4,LS=15,CL=(x,a,b)=>Math.min(b,Math.max(a,x));
+const calc=(h,p,t)=>1.02/Math.tan((h+10.3/(h+5.11))*rd)*(p/1010)*(283/(273+t));
+const fR=m=>{const s=Math.round(m*60);return Math.floor(s/60)+'′'+pad(s%60)+'″'};
+const fD=d=>{const s=Math.round(d*3600),m=Math.floor(s%3600/60),c=s%60;return Math.floor(s/3600)+'°'+(m||c?pad(m)+'′'+pad(c)+'″':'')};
+const val=()=>({h:+$('h').value,p:+$('p').value,t:+$('t').value});
+let has=typeof THREE!=='undefined'&&!!THREE.OrbitControls,S3=null,PB=[];
+const scene=(h,R)=>{if(has&&S3)S3(h,R)};
+
+/* ===== 3D модель: бір рет құрылады, кейін тек позициялар жаңарады ===== */
+function init3(){
+ if(S3)return;
+ const T=THREE,cv=$('cv'),vw=$('vw'),scn=new T.Scene(),cam=new T.PerspectiveCamera(45,1,.1,300),
+ ren=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'}),el=ren.domElement,
+ V=(x,y)=>new T.Vector3(x,y||0,0),P=V(0,Re+.4),HT=V(2.5,7),v1=new T.Vector3(),v2=new T.Vector3(),
+ AD={blending:T.AdditiveBlending,depthWrite:false},
+ mt=(c,o=1,x)=>new T.MeshBasicMaterial(Object.assign({color:c,transparent:o<1,opacity:o,depthWrite:o>=1},x)),
+ add=m=>(scn.add(m),m),
+ sp=(r,m,w)=>add(new T.Mesh(new T.SphereGeometry(r,w,w*.75|0),m)),
+ cy=(L,r,c,o)=>{const g=new T.CylinderGeometry(r,r,L,8);g.rotateZ(-Math.PI/2);g.translate(L/2,0,0);return new T.Mesh(g,mt(c,o))},
+ pol=(d,r)=>V(r*Math.cos(d*rd),r*Math.sin(d*rd));
+ scn.background=new T.Color(0x040a1c);
+ ren.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));cv.appendChild(el);
+
+ /* глобус текстурасы (CanvasTexture): мұхиттар, континенттер, полюс мұздары */
+ const tex=()=>{
+  const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;
+  const x=c.getContext('2d'),X=l=>(l+180)/360*W,Y=l=>(90-l)/180*H,g=x.createLinearGradient(0,0,0,H),
+  pg=a=>{x.beginPath();for(let i=0;i<a.length;i+=2)x[i?'lineTo':'moveTo'](X(a[i]),Y(a[i+1]));x.closePath();x.fill();x.stroke()};
+  g.addColorStop(0,'#0a4a99');g.addColorStop(.5,'#1670c8');g.addColorStop(1,'#0a4a99');x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.lineJoin='round';x.lineWidth=2;x.strokeStyle='#a6d9ae';x.fillStyle='#3f9150';
+  [[-166,65,-150,71,-125,70,-95,72,-80,68,-65,60,-56,52,-66,45,-76,38,-81,31,-80,25,-90,30,-97,26,-105,22,-96,16,-87,14,-83,9,-78,8,-86,12,-104,19,-112,29,-118,34,-124,41,-125,49,-135,57,-150,60,-165,60],
+  [-77,8,-63,11,-52,5,-35,-6,-39,-18,-48,-26,-58,-38,-66,-46,-69,-55,-74,-50,-73,-37,-71,-18,-81,-5,-80,1],
+  [-9,37,-9,43,-1,46,-4,48,2,51,8,54,10,57,6,62,14,68,24,71,40,68,60,69,70,73,100,77,113,74,140,72,170,69,180,66,170,60,160,60,156,51,142,54,135,45,130,40,127,35,122,31,122,25,115,22,108,20,106,10,104,1.5,100,6,98,12,94,17,92,22,88,22,80,15,77,8,73,17,67,25,57,26,56,27,50,30,48,29,51,25,56,26,59,22,52,17,45,13,43,13,39,21,35,28,34,31,35,33,36,36,30,36,27,37,23,37,20,40,19,42,14,45,16,41,12,44,8,44,3,43,0,38,-5,36],
+  [-17,21,-10,35,10,37,32,31,35,28,43,12,51,12,41,-2,40,-16,35,-25,27,-34,18,-34,12,-17,9,-1,9,4,-8,4,-17,14],
+  [114,-22,122,-17,130,-12,137,-12,142,-11,146,-19,153,-27,150,-37,142,-38,135,-35,127,-33,115,-34],
+  [95,5,105,-6,120,-8,140,-8,130,-1,120,1,110,2],[-5,50,2,51,0,57,-6,58],[130,32,141,36,142,43,140,42,135,34],[44,-25,50,-15,48,-13,43,-20],[172,-34,178,-38,174,-41,167,-46,170,-43]].forEach(pg);
+  x.fillStyle='rgba(214,190,120,.5)';[[8,24,26,9],[45,24,10,6],[100,42,16,5],[134,-25,12,7]].forEach(a=>{x.beginPath();x.ellipse(X(a[0]),Y(a[1]),a[2]*W/360,a[3]*H/180,0,0,6.3);x.fill()});
+  x.fillStyle='#eef7ff';x.fillRect(0,0,W,Y(80));x.fillRect(0,Y(-67),W,H);pg([-72,78,-58,82,-30,83,-20,75,-22,70,-42,60,-50,64,-56,70]);
+  x.strokeStyle='rgba(255,255,255,.14)';x.lineWidth=1;
+  for(let l=-150;l<=180;l+=30){x.beginPath();x.moveTo(X(l),0);x.lineTo(X(l),H);x.stroke()}
+  for(let l=-60;l<=60;l+=30){x.beginPath();x.moveTo(0,Y(l));x.lineTo(W,Y(l));x.stroke()}
+  const t=new T.CanvasTexture(c);t.anisotropy=Math.min(4,ren.capabilities.getMaxAnisotropy());return t};
+
+ /* жиектері тұрақты жіңішке түтік: әр жаңартуда тек төбелер позициясы өзгереді */
+ function tube(rn,rad,col){
+  const rs=8,pos=new Float32Array(rn*rs*3),g=new T.BufferGeometry(),ix=[],cs=[],sn=[];
+  for(let j=0;j<rs;j++){cs.push(Math.cos(j/rs*6.2832)*rad);sn.push(Math.sin(j/rs*6.2832)*rad)}
+  for(let i=0;i<rn-1;i++)for(let j=0;j<rs;j++){const a=i*rs+j,b=i*rs+(j+1)%rs;ix.push(a,b,a+rs,b,b+rs,a+rs)}
+  g.setAttribute('position',new T.BufferAttribute(pos,3));g.setIndex(ix);
+  const m=new T.Mesh(g,mt(col,1,{side:T.DoubleSide}));m.frustumCulled=false;add(m);
+  m.set=p=>{
+   const n=p.length/2,cm=[0],c=[];
+   for(let i=1;i<n;i++)cm[i]=cm[i-1]+Math.hypot(p[2*i]-p[2*i-2],p[2*i+1]-p[2*i-1]);
+   for(let i=0,k=1;i<rn;i++){const s=cm[n-1]*i/(rn-1);while(k<n-1&&cm[k]<s)k++;const f=(s-cm[k-1])/((cm[k]-cm[k-1])||1);c.push(p[2*k-2]+(p[2*k]-p[2*k-2])*f,p[2*k-1]+(p[2*k+1]-p[2*k-1])*f)}
+   for(let i=0;i<rn;i++){const a=Math.max(0,i-1),b=Math.min(rn-1,i+1);let tx=c[2*b]-c[2*a],ty=c[2*b+1]-c[2*a+1];const l=Math.hypot(tx,ty)||1;tx/=l;ty/=l;
+    for(let j=0;j<rs;j++){const o=(i*rs+j)*3;pos[o]=c[2*i]-ty*cs[j];pos[o+1]=c[2*i+1]+tx*cs[j];pos[o+2]=sn[j]}}
+   g.attributes.position.needsUpdate=true};
+  return m}
+
+ /* жарық, Жер, атмосфера қабаттары */
+ scn.add(new T.AmbientLight(0xb4ccff,.8));const dl=new T.DirectionalLight(0xffffff,.8);dl.position.set(8,14,22);scn.add(dl);
+ const earth=sp(Re,new T.MeshPhongMaterial({map:tex(),shininess:14,specular:0x223a55}),64);earth.rotation.set(0,-67*rd,41*rd,'ZYX');
+ [[.5,.2,0x8fe3ff],[.95,.1,0x4da3ff],[Z,.06,0x3a6bff]].forEach(a=>sp(Re+a[0],mt(a[2],a[1],AD),40));
+ sp(Re+Z+.5,mt(0x3b82f6,.12,Object.assign({side:T.BackSide},AD)),40);
+ [[Re,Re+.5,0x7fdcff,.3],[Re+.5,Re+.95,0x4da3ff,.2],[Re+.95,Re+Z,0x3a6bff,.14]].forEach(a=>add(new T.Mesh(new T.RingGeometry(a[0],a[1],144,1),mt(a[2],a[3],{side:T.DoubleSide,depthWrite:false}))));
+ {const n=700,a=new Float32Array(n*3),g=new T.BufferGeometry();
+  for(let i=0;i<n;i++){const u=Math.random()*2-1,t=Math.random()*6.2832,s=Math.sqrt(1-u*u);a.set([150*s*Math.cos(t),150*u,150*s*Math.sin(t)],i*3)}
+  g.setAttribute('position',new T.BufferAttribute(a,3));add(new T.Points(g,new T.PointsMaterial({color:0xffffff,size:2,sizeAttenuation:false})))}
+
+ /* бақылаушы, телескоп, сызықтар, жұлдыздар */
+ const hor=cy(10.4,.03,0x94a3b8,.9),nz=new T.Group(),gd=new T.Group(),og=cy(LS,.06,0xff9f43),tel=new T.Group(),
+ sS=sp(.4,mt(0xfff3a0),16),hS=sp(.85,mt(0xfde047,.22,AD),16),sA=sp(.38,mt(0xff9f43,.6),16);
+ hor.position.set(-4.4,P.y,0);add(hor);
+ for(let i=0;i<9;i++){const d=cy(.28,.025,0xe5e7eb);d.position.x=i*.48;nz.add(d)}nz.position.copy(P);nz.rotation.z=Math.PI/2;add(nz);
+ for(let i=0;i<22;i++){const d=cy(.42,.055,0x4ade80);d.position.x=i*LS/22;gd.add(d)}gd.position.copy(P);add(gd);
+ og.position.copy(P);add(og);
+ tel.add(cy(1.35,.1,0xdbe7f7,.5));const ob=cy(.3,.15,0x93b4e6,.85);ob.position.x=1.05;tel.add(ob);tel.position.copy(P);add(tel);
+ const bd=new T.Mesh(new T.CylinderGeometry(.1,.12,.32,10),mt(0xe5e7eb)),hd=sp(.12,mt(0xffe0b5),14);
+ bd.position.set(-.12,Re+.16,0);hd.position.set(-.12,Re+.4,0);add(bd);
+ const ray=tube(110,.07,0x38d5ff),arc=tube(28,.05,0xfde047);
+
+ /* HTML жазулар (аз әрі қабаттаспайтындай) */
+ const lb=[],mk=(t,c,k,p)=>{const e=document.createElement('div');e.className='lb '+k;e.textContent=t;e.style.color=c;cv.appendChild(e);const o={e,p};lb.push(o);return o};
+ mk('Бақылаушы','#fff','l',V(-.35,Re+.4));mk('Көкжиек','#cbd5e1','a',V(-4.4,Re+.4));mk('Зенит','#e5e7eb','a',V(0,Re+4.7));
+ mk('Сирек жоғарғы қабат','#9fc3ff','l',pol(148,6.15));mk('Тығыз төменгі қабат','#c9f0ff','l',pol(128,5.25));
+ const lS=mk('Жұлдыздың нақты орны','#fde047','b',V(0,0)),lA=mk('Көрінерлік орны','#ff9f43','a',V(0,0)),lR=mk('R','#fde047','r',V(0,0));
+
+ /* камераны басқару: OrbitControls r128 */
+ const ct=new T.OrbitControls(cam,el);
+ Object.assign(ct,{enableDamping:true,dampingFactor:.08,enableZoom:true,enablePan:true,autoRotate:false,screenSpacePanning:true,minDistance:6,maxDistance:70,minPolarAngle:.08,maxPolarAngle:Math.PI-.08,rotateSpeed:.75,zoomSpeed:.9,panSpeed:.8});
+ let need=1,go=null,hold=null;
+ const tmin=new T.Vector3(-14,-8,-10),tmax=new T.Vector3(24,28,10),
+ cur=()=>new T.Spherical().setFromVector3(v1.copy(cam.position).sub(ct.target)),
+ r0=()=>32*Math.max(1,1.5/cam.aspect),
+ aim=(f,t)=>{const s=go?go.s:cur();f(s);s.phi=CL(s.phi,.08,Math.PI-.08);s.radius=CL(s.radius,ct.minDistance,ct.maxDistance);go={s,t:t||(go?go.t:ct.target.clone())};need=1},
+ rot=(a,b)=>()=>aim(s=>{s.theta+=a;s.phi+=b}),zm=k=>()=>aim(s=>{s.radius*=k}),
+ view=(th,ph)=>()=>aim(s=>{s.theta=th;s.phi=ph;s.radius=r0()},HT),
+ fit=()=>{const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();need=1};
+ fit();ct.target.copy(HT);cam.position.copy(HT).add(v1.setFromSpherical(new T.Spherical(r0(),1.4,.22)));ct.update();
+ ct.addEventListener('change',()=>{need=1});ct.addEventListener('start',()=>{go=null;hold=null});
+ window.ResizeObserver?new ResizeObserver(fit).observe(vw):addEventListener('resize',fit);
+ el.addEventListener('webglcontextlost',e=>e.preventDefault());el.addEventListener('webglcontextrestored',()=>{need=1});
+ document.addEventListener('visibilitychange',()=>{need=1});
+
+ /* толық экран (Fullscreen API; болмаса CSS арқылы) */
+ const nat=()=>document.fullscreenElement||document.webkitFullscreenElement,
+ sync=()=>{const f=!!nat()||vw.classList.contains('fs');vw.classList.toggle('big',f);$('c3x').textContent=f?'✕ Шығу (Esc)':'Толық экран';document.documentElement.style.overflow=vw.classList.contains('fs')?'hidden':'';need=1;fit()},
+ fs=()=>{
+  if(nat()){(document.exitFullscreen||document.webkitExitFullscreen).call(document)}
+  else if(vw.classList.contains('fs')){vw.classList.remove('fs');sync()}
+  else{const r=vw.requestFullscreen||vw.webkitRequestFullscreen,fb=()=>{vw.classList.add('fs');sync()};
+   if(r){try{const p=r.call(vw);if(p&&p.catch)p.catch(fb)}catch(e){fb()}}else fb()}};
+ ['fullscreenchange','webkitfullscreenchange'].forEach(e=>document.addEventListener(e,sync));
+ addEventListener('keydown',e=>{if(e.key==='Escape'&&vw.classList.contains('fs')){vw.classList.remove('fs');sync()}});
+
+ /* батырмалар (+, −, бағыттар басып тұрғанда қайталанады) */
+ const B=(id,fn,rep)=>{const b=$(id);if(!rep){b.onclick=fn;return}
+  b.onpointerdown=e=>{e.preventDefault();fn();hold={fn,t:performance.now(),n:0}};b.onclick=e=>{if(!e.detail)fn()};
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>b.addEventListener(t,()=>{hold=null}))};
+ B('c3h',()=>aim(s=>{s.theta=.22;s.phi=1.4;s.radius=r0()},HT));B('c3p',zm(.8),1);B('c3m',zm(1.25),1);
+ B('c3l',rot(-.2,0),1);B('c3r',rot(.2,0),1);B('c3u',rot(0,-.15),1);B('c3d',rot(0,.15),1);
+ B('c3s',view(1.05,1.3));B('c3f',view(0,Math.PI/2));B('c3t',view(.2,.55));B('c3x',fs);
+
+ /* жазулардың орны: камера айналғанда жаңарады, Жердің артында қалса жасырылады */
+ const occ=p=>{const d=v1.copy(p).sub(cam.position),L=d.length();d.divideScalar(L);const b=cam.position.dot(d),q=b*b-(cam.position.lengthSq()-Re*Re*.97);if(q<0)return false;const t=-b-Math.sqrt(q);return t>0&&t<L},
+ labels=()=>{const W=cv.clientWidth,H=cv.clientHeight;lb.forEach(l=>{v2.copy(l.p).project(cam);const ok=v2.z<1&&!occ(l.p);l.e.style.display=ok?'block':'none';if(ok){l.e.style.left=(v2.x*.5+.5)*W+'px';l.e.style.top=(.5-v2.y*.5)*H+'px'}})};
+
+ /* бір ғана requestAnimationFrame циклі; өзгеріс болғанда ғана сурет салынады */
+ (function loop(){
+  requestAnimationFrame(loop);
+  const now=performance.now();
+  if(hold&&now-hold.t>400&&now-hold.n>100){hold.fn();hold.n=now}
+  if(go){const c=cur();let d=go.s.theta-c.theta;d-=6.2832*Math.round(d/6.2832);const e=go.s.phi-c.phi,f=go.s.radius-c.radius;
+   c.theta+=d*.2;c.phi+=e*.2;c.radius+=f*.2;ct.target.lerp(go.t,.2);cam.position.copy(ct.target).add(v1.setFromSpherical(c));
+   if(Math.abs(d)<.003&&Math.abs(e)<.003&&Math.abs(f)<.03&&ct.target.distanceTo(go.t)<.03)go=null;need=1}
+  ct.update();ct.target.clamp(tmin,tmax);
+  if(cam.position.length()<Re+1){cam.position.setLength(Re+1);cam.lookAt(ct.target)}
+  if(need){need=0;ren.render(scn,cam);labels()}
+ })();
+
+ /* физикалық көрініс: h – геометриялық биіктік, R – Сэмундссон бойынша рефракция (′) */
+ S3=(h,R)=>{
+  const k=+$('mag').value,a1=h*rd,dq=Math.min(k*R/60,89-h),a0=(h+dq)*rd,
+  dT=V(Math.cos(a1),Math.sin(a1)),dA=V(Math.cos(a0),Math.sin(a0)),S=P.clone().addScaledVector(dT,LS),A=P.clone().addScaledVector(dA,LS),
+  Hs=Z/3.5,F=z=>1-Math.exp(-z/Hs),F0=F(P.y-Re),FT=F(Z);
+  let ps=a1,pts=[];
+  /* сәулені бақылаушыдан кері бағытта жүргіземіз: бағыты a0 (көрінерлік) → ps (атмосфера шеті).
+     Бағыт тығыздық профилі бойынша біртіндеп өзгереді; жұлдыз геометриялық сызықта жатады */
+  for(let it=0;it<5;it++){
+   pts=[P.x,P.y];let x=P.x,y=P.y,r=P.y;
+   for(let n=0;n<500;n++){
+    const a=a0+(ps-a0)*(F(r-Re)-F0)/(FT-F0),nx=x+Math.cos(a)*.06,ny=y+Math.sin(a)*.06,nr=Math.hypot(nx,ny);
+    if(nr>=Re+Z){const t=(Re+Z-r)/(nr-r);x+=(nx-x)*t;y+=(ny-y)*t;pts.push(x,y);break}
+    x=nx;y=ny;r=nr;pts.push(x,y)}
+   ps=Math.atan2(S.y-y,S.x-x)}
+  ray.set(pts.concat([S.x,S.y]));
+  gd.rotation.z=a1;og.rotation.z=a0;tel.rotation.z=a0;sS.position.copy(S);hS.position.copy(S);sA.position.copy(A);
+  const ar=[];for(let i=0;i<=16;i++){const a=a1+(a0-a1)*i/16;ar.push(P.x+Math.cos(a)*3.4,P.y+Math.sin(a)*3.4)}
+  arc.set(ar);arc.visible=dq>.2;
+  const m=(a0+a1)/2;lS.p.copy(S);lA.p.copy(A);lR.p.set(P.x+Math.cos(m)*4.4,P.y+Math.sin(m)*4.4,0);
+  lR.e.textContent='R = '+fR(R)+(k>1?' (көрнекі ×'+k+')':' (нақты масштаб)');
+  need=1};
+}
+
+function draw(h,p,t,R){
+ const c=$('gr'),dp=devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;if(!W)return;
+ if(c.width!=Math.round(W*dp)||c.height!=Math.round(H*dp)){c.width=Math.round(W*dp);c.height=Math.round(H*dp)}
+ const x=c.getContext('2d'),mx=calc(0,p,t)*1.08,X=a=>42+a/85*(W-56),Y=r=>H-26-r/mx*(H-40),rt=X(h)>W*.65;
+ x.setTransform(dp,0,0,dp,0,0);x.clearRect(0,0,W,H);x.font='12px system-ui,Arial';x.lineWidth=1;
+ for(let i=0;i<=4;i++){const r=mx*i/4;x.strokeStyle='#1f4a8f';x.beginPath();x.moveTo(42,Y(r));x.lineTo(W-14,Y(r));x.stroke();x.fillStyle='#9fb8e6';x.textAlign='right';x.fillText(r.toFixed(r<10?1:0)+'′',38,Y(r)+4)}
+ x.textAlign='center';[0,15,30,45,60,75,85].forEach(a=>x.fillText(a+'°',X(a),H-8));
+ x.strokeStyle='#38d5ff';x.lineWidth=2.5;x.beginPath();for(let a=0;a<=85;a+=.5)x[a?'lineTo':'moveTo'](X(a),Y(calc(a,p,t)));x.stroke();
+ x.fillStyle='#ff9f43';x.beginPath();x.arc(X(h),Y(R),6,0,7);x.fill();
+ x.fillStyle='#fff';x.textAlign=rt?'right':'left';x.fillText('R = '+fR(R),X(h)+(rt?-11:11),Y(R)-9);
+}
+
+let RV=null;
+function real(h,p,t,R){
+ const c=$('rlc'),W=c.clientWidth,H=c.clientHeight;if(!W||!H||$('rl').classList.contains('off'))return;
+ const dp=Math.min(devicePixelRatio||1,2);
+ if(c.width!=Math.round(W*dp)||c.height!=Math.round(H*dp)){c.width=Math.round(W*dp);c.height=Math.round(H*dp)}
+ const x=c.getContext('2d'),r=.2667,S=H/2.6,cx=W/2,Y=a=>H/2-(a-h)*S,
+ bl=h-r+calc(h-r,p,t)/60,bu=h+r+calc(h+r,p,t)/60,ac=(bl+bu)/2,ry=(bu-bl)/2,fl=Math.round((1-ry/r)*100),fz=Math.max(10,Math.min(15,W/26)),g=x.createLinearGradient(0,0,0,H);
+ x.setTransform(dp,0,0,dp,0,0);x.clearRect(0,0,W,H);
+ g.addColorStop(0,'#0b2a66');g.addColorStop(1,'#4a78b8');x.fillStyle=g;x.fillRect(0,0,W,H);
+ if(Y(0)<H){x.fillStyle='#16241a';x.fillRect(0,Y(0),W,H-Y(0));x.fillStyle='#cbd5e1';x.fillRect(0,Y(0)-1,W,2)}
+ x.fillStyle='#ffb347';x.beginPath();x.ellipse(cx,Y(ac),r*S,ry*S,0,0,6.3);x.fill();
+ x.strokeStyle='#4ade80';x.lineWidth=2;x.setLineDash([5,4]);x.beginPath();x.arc(cx,Y(h),r*S,0,6.3);x.stroke();x.setLineDash([]);
+ const dot=(y,f,s)=>{x.fillStyle=f;x.strokeStyle=s;x.lineWidth=2;x.beginPath();x.arc(cx,y,4,0,6.3);x.fill();x.stroke()};
+ dot(Y(h),'#4ade80','#06210f');dot(Y(h+R/60),'#fff','#ff7a00');
+ x.font='600 '+fz+'px system-ui,Arial';x.textAlign='left';
+ x.fillStyle='#4ade80';x.fillText('┅ нақты орны',8,fz+4);x.fillStyle='#ffb347';x.fillText('● көрінетін орны',8,2*fz+8);
+ const L=['R = '+fR(R)+' = '+(R/60).toFixed(2).replace('.',',')+'°','Күн диаметрі ≈ 32′'+(fl>0?', тік өлшемі −'+fl+'%':'')];if(h==0)L.push('Күн жартылай батқан, бірақ толық көрінеді');
+ const lh=fz+4,y0=H-L.length*lh;x.fillStyle='rgba(4,10,28,.78)';x.fillRect(0,y0-6,W,L.length*lh+6);
+ x.fillStyle='#fff';L.forEach((q,i)=>x.fillText(q,8,y0+i*lh+fz-2));
+}
+function upd(){
+ const {h,p,t}=val(),R=calc(h,p,t),ha=h+R/60,ts=(t>0?'+':'')+t+' °C';
+ $('vh').textContent=h+'°';$('vp').textContent=p+' гПа';$('vt').textContent=ts;
+ PB.forEach(b=>b.classList.toggle('on',parseInt(b.textContent)==h));
+ $('rs').innerHTML=[['Рефракция R',fR(R),'o',R.toFixed(2)+'′'],['Нақты биіктік',fD(h),'','h<sub>геом</sub>'],['Көрінерлік биіктік',fD(ha),'c','h<sub>көр</sub>'],['Зениттік қашықтық',fD(90-h),'','көрінерлік: '+fD(90-ha)],['Атмосфералық қысым',p+' гПа','',''],['Температура',ts,'','']].map(a=>'<div class="k '+a[2]+'"><small>'+a[0]+'</small><b>'+a[1]+'</b><small>'+a[3]+'</small></div>').join('');
+ $('lv').innerHTML='Ағымдағы мән: h = '+h+'°, P = '+p+' гПа, T = '+ts+' → R = <b>'+fR(R)+'</b>, h<sub>көр</sub> = <b>'+fD(ha)+'</b>';
+ draw(h,p,t,R);scene(h,R);RV=[h,p,t,R];real(h,p,t,R);
+}
+
+const EX=[
+{n:'Биіктіктің әсері',d:'Қысым мен температураны өзгертпеңіз (1010 гПа, +10 °C). Биіктікті таңдап, әр жағдайда «Өлшеуді сақтау» батырмасын басыңыз.',k:'h',u:'°',v:[0,10,30,60,85]},
+{n:'Атмосфералық қысымның әсері',d:'Биіктік (30°) пен температура (+10 °C) тұрақты. Қысымды өзгертіп, рефракцияның өзгерісін бақылаңыз да, өлшеуді сақтаңыз.',k:'p',u:' гПа',v:[800,900,1010,1050]},
+{n:'Температураның әсері',d:'Биіктік (30°) пен қысым (1010 гПа) тұрақты. Температураны өзгертіп, рефракцияны бақылаңыз да, өлшеуді сақтаңыз.',k:'t',u:' °C',v:[-20,0,10,40]}];
+const DF={h:30,p:1010,t:10};let rows=[],ei=0;
+const tbl=()=>{$('csv').disabled=!rows.length;$('tb').innerHTML=rows.length?rows.map(r=>'<tr><td>'+r.e+'</td><td>'+r.h+'°</td><td>'+r.p+'</td><td>'+(r.t>0?'+':'')+r.t+'</td><td>'+fR(r.R)+' <small>('+r.R.toFixed(2)+'′)</small></td><td>'+fD(r.h+r.R/60)+'</td></tr>').join(''):'<tr><td colspan="6">Кесте бос. Тәжірибе жасап, өлшеуді сақтаңыз.</td></tr>'};
+function setEx(i){
+ ei=i;const e=EX[i];['h','p','t'].forEach(k=>$(k).value=DF[k]);$('ed').textContent=e.d;
+ [...$('et').children].forEach((b,j)=>b.classList.toggle('on',j==i));
+ $('qb').innerHTML='';e.v.forEach(x=>{const b=document.createElement('button');b.textContent=x+e.u;b.onclick=()=>{$(e.k).value=x;upd()};$('qb').appendChild(b)});
+ upd();
+}
+EX.forEach((e,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'-тәжірибе. '+e.n;b.onclick=()=>setEx(i);$('et').appendChild(b)});
+PB=[0,10,30,45,60,75,85].map(v=>{const b=document.createElement('button');b.textContent=v+'°';b.onclick=()=>{$('h').value=v;upd()};$('pr').appendChild(b);return b});
+['h','p','t'].forEach(k=>$(k).oninput=upd);$('mag').onchange=upd;
+$('c3w').onclick=()=>{const o=$('rl');o.classList.toggle('off');$('c3w').classList.toggle('on',!o.classList.contains('off'));if(RV)real(...RV)};
+if(window.ResizeObserver)new ResizeObserver(()=>{if(RV)real(...RV)}).observe($('rlc'));
+$('sv').onclick=()=>{const {h,p,t}=val();rows.push({e:ei+1,h,p,t,R:calc(h,p,t)});tbl()};
+$('cl').onclick=()=>{rows=[];tbl()};
+$('csv').onclick=()=>{
+ if(!rows.length)return;
+ const c='\uFEFF'+['Тәжірибе №;h, °;P, гПа;T, °C;R, ′;hкөр, °'].concat(rows.map(r=>[r.e,r.h,r.p,r.t,r.R.toFixed(3),(r.h+r.R/60).toFixed(5)].join(';').replace(/\./g,','))).join('\r\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/csv;charset=utf-8'}));a.download='refraksiya.csv';document.body.appendChild(a);a.click();a.remove();
+};
+let rq=0;addEventListener('resize',()=>{cancelAnimationFrame(rq);rq=requestAnimationFrame(upd)});
+
+const Q=[
+{q:'Атмосфералық рефракция дегеніміз не?',o:['Жұлдыз жарығының әлсіреуі','Жарық сәулесінің атмосфера қабаттарында бағытын өзгертуі','Жердің өз осінен айналуы','Жұлдыздардың орнын ауыстыруы'],a:1,e:'Рефракция – жарық тығыздығы әртүрлі атмосфера қабаттарынан өткендегі иілуі.'},
+{q:'Рефракция неліктен пайда болады?',o:['Жердің магнит өрісінен','Күн желінің әсерінен','Атмосфера тығыздығының биіктікпен өзгеруінен','Жұлдыздың қозғалысынан'],a:2,e:'Ауа тығыздығы биіктікпен өзгереді, сондықтан сәуле біртіндеп иіледі.'},
+{q:'Рефракция қай жағдайда ең үлкен болады?',o:['Зенитте','h = 45° болғанда','Көкжиекке жақын (h ≈ 0°)','Барлық биіктікте бірдей'],a:2,e:'Көкжиекке жақын сәуле атмосферада ұзақ жол жүреді, R шамамен 30′ (≈0,5°) жетеді.'},
+{q:'Қысым артып, температура төмендегенде рефракция қалай өзгереді?',o:['Азаяды','Артады','Өзгермейді','Нөлге тең болады'],a:1,e:'Ауа тығыздығы артады: (P/1010)·(283/(273+T)) коэффициенті үлкейеді, сондықтан R артады.'},
+{q:'Көрінерлік биіктік белгілі болса, нақты биіктікті қалай табамыз?',o:['hгеом = hкөр − R/60','hгеом = hкөр + R/60','hгеом = hкөр · R','Түзетудің қажеті жоқ'],a:0,e:'hкөр = hгеом + R/60, сондықтан hгеом = hкөр − R/60 (R – минутпен).'}];
+let score=0;
+Q.forEach((it,i)=>{
+ const d=document.createElement('div'),f=document.createElement('p');d.className='q';d.innerHTML='<b>'+(i+1)+'. '+it.q+'</b>';
+ it.o.forEach((o,j)=>{const b=document.createElement('button');b.textContent=o;
+  b.onclick=()=>{if(d.dataset.d)return;d.dataset.d=1;const ok=j==it.a;if(ok)score++;b.classList.add(ok?'ok':'no');d.querySelectorAll('button')[it.a].classList.add('ok');f.textContent=(ok?'✔ Дұрыс! ':'✘ Қате. ')+it.e;$('pt').textContent='Нәтиже: '+score+' / '+Q.length};
+  d.appendChild(b)});
+ d.appendChild(f);$('qz').appendChild(d);
+});
+
+if(has){try{init3()}catch(e){has=false;$('tb3').style.display='none';$('cv').innerHTML='<p class="er">Браузер WebGL-ді қолдамайды немесе ол өшірулі, сондықтан 3D модель көрсетілмейді. Есептеулер, график және тәжірибелер жұмыс істей береді.</p>'}}
+else{$('tb3').style.display='none';$('cv').innerHTML='<p class="er">Three.js немесе OrbitControls кітапханасы жүктелмеді. Интернет байланысын тексеріп, бетті жаңартыңыз. Есептеулер, график және тәжірибелер жұмыс істей береді.</p>'}
+tbl();setEx(0);
+</script>
+</body>
+</html>
